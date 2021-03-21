@@ -5,7 +5,7 @@ import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs
 
-parser = argparse.ArgumentParser(description='creates xss payloads and starts http server to collect cookies', epilog='xssthief 10.10.10.50' + '\n' + 'xssthief 10.10.10.50 --obfuscated', formatter_class=argparse.RawTextHelpFormatter)
+parser = argparse.ArgumentParser(description='creates xss payloads and starts http server to capture responses and collect cookies', epilog='xssthief 10.10.10.50' + '\n' + 'xssthief 10.10.10.50 --obfuscated', formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('lhost', help='ip address of listening host')
 parser.add_argument('-o', '--obfuscated', action='store_true', help='create obfuscated payload')
 args = parser.parse_args()
